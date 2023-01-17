@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="new-test-suite.xml" />
+	<munit:test name="new-test-suite-ci-cd-templateFlowTest" doc:id="891bd877-88ee-4daf-8149-dc0e1833e88e" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to ci-cd-templateFlow" doc:id="8947921e-0f8b-4792-a7e8-26ce43e6928b" name="ci-cd-templateFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Payload not null" doc:id="8e667205-7091-4885-98f0-90a1de8ce2ac" />
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

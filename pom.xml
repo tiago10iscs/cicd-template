@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!--
+
+
+	<parent>
+		<groupId>com.mycompany</groupId>
+		<artifactId>parent-pom</artifactId>
+		<version>0.0.5</version>
+		<relativePath />
+	</parent> 
+	-->
+	<groupId>com.mycompany</groupId>
+	<artifactId>ci-cd-template</artifactId>
+	<version>0.3.7-SNAPSHOT</version>
+	<packaging>mule-application</packaging>
+
+	<name>ci-cd-template</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<deploy.runtime>4.3.0</deploy.runtime>
+		<app.runtime>4.3.0-20201013</app.runtime>
+		<munit.version>2.3.0</munit.version>
+		<project.scm.id>my-scm-server</project.scm.id>
+		<!-- Server Credentials for SCM (Github) In settings.xml
+
+			Permissions:
+			- Commit statuses - Read and Write
+			- Contents: Read-only (to read the Jenkinsfile and the repository content during git fetch). You may need "Read & write" to update the repository such as tagging releases
+			- Metadata: Read-only
+			- Pull requests: Read-only
+			- Under Subscribe to events, enable all events.
+
+			<server>
+				<id>my-scm-server</id>
+				<username>scmUser</username>
+				<password>scmPass</password>
+			</server>
+		-->
+		<mule.maven.plugin.version>3.4.2</mule.maven.plugin.version>
+	</properties>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.mule.tools.maven</groupId>
+					<artifactId>mule-maven-plugin</artifactId>
+					<version>${mule.maven.plugin.version}</version>
+					<extensions>true</extensions>
+					<configuration>
+						<cloudHubDeployment>
+							<uri>https://anypoint.mulesoft.com</uri>
+							<muleVersion>${app.runtime}</muleVersion>
+							<!-- 
+				  <username>${username}</username>
+				  <password>${password}</password>
+				   -->
+							<applicationName>${cloudhub.application.name}</applicationName>
+							<artifact>${artifact.path}</artifact>
+							<!-- 
+					The absolute path of the JAR file to be deployed. If not set, the path defaults to the location of the JAR file generated at the package phase.
+				   -->
+							<environment>${environment}</environment>
+							<!-- 
+					APP Properties (users, secrets, endpoint, anypoint id and secrets and etc.)
+				   -->
+							<properties>
+								<api.id>1234567</api.id>
+							</properties>
+							<workers>${workers}</workers>
+							<workerType>${workerType}</workerType>
+							<region>${region}</region>
+							<objectStoreV2>true</objectStoreV2>
+							<!-- 
+					The Business group path of the deployment
+					Specify the full hierarchical path from the parent organization to the target Business group, for example:
+					<businessGroup>ParentOrg\SubOrg1\myBusinessGroup</businessGroup>
+				   -->
+							<persistentQueues>false</persistentQueues>
+							<businessGroupId>${businessGroupId}</businessGroupId>
+							<deploymentTimeout>1000000</deploymentTimeout>
+
+							<!-- 
+					Use to get Credentials from the settings.xml
+				  <server>${server}</server>
+				   -->
+							<connectedAppClientId>${ciCdAppId}</connectedAppClientId>
+							<connectedAppClientSecret>${ciCdAppSecret}</connectedAppClientSecret>
+							<connectedAppGrantType>client_credentials</connectedAppGrantType>
+
+							<!-- Server Credentials for Anypoint Platform In settings.xml
+
+					Permissions:
+					 - https://help.mulesoft.com/s/article/Minimum-Permissions-for-CI-CD-Account-When-Deploying-APIs-via-Mule-Maven-Plugin					 
+
+						<server>
+							<id>${server}</id>
+							<username>anypointUser</username>
+							<password>anypointPass</password>
+						</server>
+					-->
+
+							<skip>false</skip>
+							<skipDeploymentVerification>${skipDeployCheck}</skipDeploymentVerification>
+
+							<!-- 
+				  <authToken></authToken>
+				  <connectedAppClientId></connectedAppClientId>
+				  <connectedAppClientSecret></connectedAppClientSecret>
+				  <connectedAppGrantType></connectedAppGrantType>
+				   -->
+							<applyLatestRuntimePatch>false</applyLatestRuntimePatch>
+
+						</cloudHubDeployment>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.mule.tools.maven</groupId>
+				<artifactId>mule-maven-plugin</artifactId>
+				<configuration>
+					<classifier>mule-application</classifier>
+				</configuration>
+				<version>3.8.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.0.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+				<configuration>
+					<arguments>-DskipTests</arguments>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-scm-plugin</artifactId>
+						<version>1.11.2</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-api</artifactId>
+						<version>1.11.2</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>com.mulesoft.munit.tools</groupId>
+				<artifactId>munit-maven-plugin</artifactId>
+				<version>${munit.version}</version>
+				<executions>
+					<execution>
+						<id>test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+							<goal>coverage-report</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<coverage>
+						<runCoverage>true</runCoverage>
+						<failBuild>false</failBuild>
+						<requiredApplicationCoverage>75</requiredApplicationCoverage>
+						<requiredResourceCoverage>50</requiredResourceCoverage>
+						<requiredFlowCoverage>50</requiredFlowCoverage>
+						<formats>
+							<format>console</format>
+							<format>html</format>
+							<format>json</format>
+							<format>sonar</format>
+						</formats>
+					</coverage>
+					<dynamicPorts>
+						<dynamicPort>a.dynamic.port</dynamicPort>
+					</dynamicPorts>
+					<enableSurefireReports>true</enableSurefireReports>
+					<enableSonarReports>false</enableSonarReports>
+					<redirectTestOutputToFile>false</redirectTestOutputToFile>
+					<testOutputDirectory>${project.build.directory}/munit-reports/output/</testOutputDirectory>
+					<!--
+					<runtimeVersion>${app.runtime}</runtimeVersion>
+					-->
+
+					<runtimeProduct>MULE_EE</runtimeProduct>
+					<!--
+						Settings.xml must have access to Mule NEXUS Enterprise Repository with Credentials
+						https://help.mulesoft.com/s/article/How-to-use-Enterprise-Maven-Repository-credentials-with-settings-xml-and-pom-xml-example						
+					-->
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.mule.connectors</groupId>
+			<artifactId>mule-http-connector</artifactId>
+			<version>1.5.22</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.mule.connectors</groupId>
+			<artifactId>mule-sockets-connector</artifactId>
+			<version>1.2.0</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.munit</groupId>
+			<artifactId>munit-runner</artifactId>
+			<version>${munit.version}</version>
+			<classifier>mule-plugin</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.munit</groupId>
+			<artifactId>munit-tools</artifactId>
+			<version>${munit.version}</version>
+			<classifier>mule-plugin</classifier>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>anypoint-exchange-v2</id>
+			<name>Anypoint Exchange</name>
+			<url>https://maven.anypoint.mulesoft.com/api/v2/maven</url>
+			<layout>default</layout>
+		</repository>
+		<repository>
+			<id>mulesoft-releases</id>
+			<name>MuleSoft Releases Repository</name>
+			<url>https://repository.mulesoft.org/releases/</url>
+			<layout>default</layout>
+		</repository>
+		<repository>
+			<id>nexus-releases</id>
+			<url>http://localhost:8099/repository/maven-releases/</url>
+		</repository>
+		<repository>
+			<id>anypoint-exchange-v3</id>
+			<name>Anypoint Exchange V3</name>
+			<url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
+			<layout>default</layout>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>mulesoft-releases</id>
+			<name>mulesoft release repository</name>
+			<layout>default</layout>
+			<url>https://repository.mulesoft.org/releases/</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+		<pluginRepository>
+			<id>mule-public</id>
+			<url>https://repository.mulesoft.org/nexus/content/repositories/releases</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<scm>
+		<connection>scm:git:https://github.com/Timestamp-ITS/ci-cd-template.git</connection>
+		<developerConnection>scm:git:https://github.com/Timestamp-ITS/ci-cd-template.git</developerConnection>
+		<url>git://github.com/Timestamp-ITS/ci-cd-template.git</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<distributionManagement>
+		<repository>
+			<id>nexus-releases</id>
+			<url>http://localhost:8099/repository/maven-releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus-snapshots</id>
+			<url>http://localhost:8099/repository/maven-snapshots/</url>
+		</snapshotRepository>
+		<!-- Server Credentials Nexus Repositories In settings.xml
+		<server>
+			<id>nexus-releases</id>
+			<username>nexusUser</username>
+			<password>nexusPass</password>
+		</server>
+		<server>
+			<id>nexus-snapshots</id>
+			<username>nexusUser</username>
+			<password>nexusPass</password>
+		</server>
+	-->
+	</distributionManagement>
+
+</project>
